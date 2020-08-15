@@ -21,6 +21,7 @@ By: Henning Thomsen
 # Standard library imports
 import socket
 import sys
+import threading
 
 # Third party imports
 import getopt
@@ -36,6 +37,21 @@ def usage():
     print("Example usage: ")
     print("./server.py -p 8000: Listen on port 8000")
 
+def client_handler(client):
+    # When client connects, spawn new thread
+        while True:
+            # Receive data
+            request = client.recv(1024)
+            
+            # Print what was received
+            print("Received data: %s" % str(request.decode()))
+
+            # Close socket when data is exhausted
+            if not request:
+                client.close()
+
+                break
+
 def server():
 
     while True:
@@ -50,25 +66,15 @@ def server():
         server_socket.bind((localhost, int(port)))
 
         # Listen for incoming connections
-        server_socket.listen(1)
+        server_socket.listen(5)
 
-        client, addr = server_socket.accept()
-        print("Client %s connected on port %s" % (addr[0], addr[1]))
-        
         while True:
-            # Receive data
-            request = client.recv(1024)
+            # Listen for client connection
+            client, addr = server_socket.accept()
+            print("Client %s connected on port %s" % (addr[0], addr[1]))
+            client_thread = threading.Thread(target=client_handler, args=(client,))
+            client_thread.start()
             
-            # Print what was received
-            print("Received data: %s" % str(request.decode()))
-
-            # Close socket when data is exhausted
-            if not request:
-                client.close()
-
-                server_socket.close()
-
-                break
 
 def main():
     """
