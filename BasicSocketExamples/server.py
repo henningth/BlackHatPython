@@ -87,6 +87,7 @@ def main():
         elif o in ("-p", "--port"):
             port = int(a)
 
-    server()
+    if port > 0:
+        server()
 
 main()
