@@ -65,8 +65,6 @@ def client():
         User sends commands to server
         """
         print("Sends commands to server.")
-        # User enters a command
-        #command_string = sys.stdin.read().encode()
 
         while True:
             command_string = input("<CMD>: ").encode()
@@ -106,6 +104,7 @@ def run_command(command_string):
     except Exception as e:
         print("Failed to run command, error message: ")
         print(e)
+        result = str(e).encode()
     return result
 
 def client_handler(client_socket):
@@ -178,8 +177,12 @@ def main():
     global command
 
     # Parse commandline options
-    options, arguments = getopt.getopt(sys.argv[1:], "ht:p:lu:c",
+    try:
+        options, arguments = getopt.getopt(sys.argv[1:], "ht:p:lu:c",
                                                      ["help", "target", "port", "listen", "upload", "command"])
+    except Exception as e:
+        print("Error: ", e)
+        usage()
 
     # Iterate over commandline arguments
     for o, a in options:
@@ -198,10 +201,11 @@ def main():
 
     # Checks commandline arguments, calls matching functions
 
-    # In case user wants program to listen for incoming connections
+    # In case user wants program to listen for incoming connections (server mode)
     if listen:
         server()
 
+    # In case user wants program to connect to a (remote) server (client mode)
     if not listen:
         client()
 
