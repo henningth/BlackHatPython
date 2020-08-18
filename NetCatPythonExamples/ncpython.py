@@ -22,6 +22,7 @@ Client features:
 
 # Standard library imports
 import socket as skt
+import subprocess
 import sys
 import threading
 
@@ -32,7 +33,7 @@ import getopt
 target = ""
 port = 0
 listen = False
-upload_destination = ""
+upload_file = ""
 command = False
 
 def usage():
@@ -43,6 +44,7 @@ def usage():
     print("Usage: ./ncpython.py -t target -p port <commands>")
     print("Here <commands can be be one of:>")
     print("-l: listen for incoming connections (server mode)")
+    print("-u <filename>: saves received file contents in <filename> (server mode)")
     print("-u <filename>: upload file to remote server (client mode)")
     print("-c: return a command shell (client mode)")
     print("-h: prints usage (both client, server)")
@@ -52,23 +54,36 @@ def client():
     This is called when program is in client mode
     (using the commands u and c.)
     """
+
+    # Connects to server
+    client_socket = skt.socket(skt.AF_INET, skt.SOCK_STREAM)
+    client_socket.connect((target, port))
+
     print("client mode.")
     if command:
         """
         User sends commands to server
         """
         print("Sends commands to server.")
-        pass
+        # User enters a command
+        #command_string = sys.stdin.read().encode()
+
+        while True:
+            command_string = input("<CMD>: ").encode()
+
+            # Sends command
+            client_socket.send(command_string)
+
+            # Receives result
+            result = client_socket.recv(1024)
+            print("Result: ")
+            print(result.decode())
 
     if len(upload_file) > 0:
         """
         Uploads file to server
         """
         print("Sends file to server.")
-
-        # Connects to server
-        client_socket = skt.socket(skt.AF_INET, skt.SOCK_STREAM)
-        client_socket.connect((target, port))
 
         # Uploads file
         with open(upload_file, "rb") as f:
@@ -81,6 +96,18 @@ def client():
                 byte = f.read(1024)
 
 
+def run_command(command_string):
+    """
+    Runs command (on server), retuns result (to client)
+    """
+    command_string = command_string.rstrip() # Remove newline
+    try:
+        result = subprocess.check_output(command_string, stderr = subprocess.STDOUT, shell=True)
+    except Exception as e:
+        print("Failed to run command, error message: ")
+        print(e)
+    return result
+
 def client_handler(client_socket):
     """
     Client handling process, spawned when client 
@@ -90,13 +117,27 @@ def client_handler(client_socket):
         print("Receives commands from client.")
         # Receive commands from client, 
         # return results to it.
-        pass
+        while True:
+            command_string = ""
+            while "\n" not in command_string:
+                byte = client_socket.recv(1024)
+                command_string += byte.decode()
+                if len(byte) < 1024:
+                    break
+            print("Received command: ", command_string)
+            # Execute command
+            result = run_command(command_string)
+            if result:
+                # Send result of command to client
+                print("Sends result to client.")
+                client_socket.send(result)
+
 
     if len(upload_file) > 0:
         print("Receives file from client.")
         # Receive file from client, saves it, 
         # and returns status.
-        with open(str("u") + upload_file, "wb") as f:
+        with open(upload_file, "wb") as f:
             # Receive byte
             while True:
                 byte = client_socket.recv(1024)
