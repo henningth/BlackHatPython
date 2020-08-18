@@ -32,6 +32,8 @@ import getopt
 target = ""
 port = 0
 listen = False
+upload_destination = ""
+command = False
 
 def usage():
     """
@@ -48,15 +50,60 @@ def usage():
 def client():
     """
     This is called when program is in client mode
+    (using the commands u and c.)
     """
-    pass
+    print("client mode.")
+    if command:
+        """
+        User sends commands to server
+        """
+        print("Sends commands to server.")
+        pass
 
-def client_handler():
+    if len(upload_file) > 0:
+        """
+        Uploads file to server
+        """
+        print("Sends file to server.")
+
+        # Connects to server
+        client_socket = skt.socket(skt.AF_INET, skt.SOCK_STREAM)
+        client_socket.connect((target, port))
+
+        # Uploads file
+        with open(upload_file, "rb") as f:
+            byte = f.read(1024)
+            while byte: # Read until byte is empty
+                # Send byte
+                client_socket.send(byte)
+                
+                # Read next 1024 bytes
+                byte = f.read(1024)
+
+
+def client_handler(client_socket):
     """
     Client handling process, spawned when client 
     connects to listening server
     """
-    pass
+    if command:
+        print("Receives commands from client.")
+        # Receive commands from client, 
+        # return results to it.
+        pass
+
+    if len(upload_file) > 0:
+        print("Receives file from client.")
+        # Receive file from client, saves it, 
+        # and returns status.
+        with open(str("u") + upload_file, "wb") as f:
+            # Receive byte
+            while True:
+                byte = client_socket.recv(1024)
+                f.write(byte)
+                if len(byte) < 1024:
+                    break
+
 
 def server():
     """
@@ -86,6 +133,8 @@ def main():
     global target
     global port
     global listen
+    global upload_file
+    global command
 
     # Parse commandline options
     options, arguments = getopt.getopt(sys.argv[1:], "ht:p:lu:c",
@@ -101,11 +150,18 @@ def main():
             port = int(a)
         elif o in ("-l", "--listen"):
             listen = True
+        elif o in ("-u", "--upload"):
+            upload_file = a
+        elif o in ("-c", "--command"):
+            command = True
 
     # Checks commandline arguments, calls matching functions
 
     # In case user wants program to listen for incoming connections
     if listen:
         server()
+
+    if not listen:
+        client()
 
 main()
