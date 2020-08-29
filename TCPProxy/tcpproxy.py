@@ -11,13 +11,16 @@ forwards it to the client.
 Command line usage:
 ./tcpproxy.py [localhost] [localport] [remotehost] [remoteport] [receive_first]
 
-Non-threaded version
+Threaded version
+
+TODO: Test with more protocols, log exchanged data.
 
 Henning Thomsen
 """
 
 import socket
 import sys
+import threading
 
 def receive_data(remote_socket):
     """
@@ -31,15 +34,18 @@ def receive_data(remote_socket):
     data = b""
     datalen = 4096
 
-    while True:
+    try:
+        while True:
 
-        received_data = remote_socket.recv(datalen)
+            received_data = remote_socket.recv(datalen)
 
-        data = data + received_data
+            data = data + received_data
 
-        if len(received_data) < datalen:            
+            if len(received_data) < datalen:            
 
-            break
+                break
+    except Exception as e:
+        print("Exception: %s" % str(e))
 
     return data
 
@@ -72,31 +78,38 @@ def client_handler(client_socket, remote_host, remote_port, receive_first):
         4: Send received data in step 3 to local_host
         """
 
-        # 1: Receive data from local_host
-        local_data = receive_data(client_socket)
-        print("1: Receive data from local_host")
+        try:
 
-        if len(local_data) > 0: # Data was received
+            # 1: Receive data from local_host
+            local_data = receive_data(client_socket)
+            print("1: Receive data from local_host")
 
-            # 2: Send received data in step 1 to remote_host
-            remote_socket.send(local_data)
-            print("2: Send received data in step 1 to remote_host")
+            if len(local_data) > 0: # Data was received
 
-        # 3: Receive data from remote_host
-        remote_data = receive_data(remote_socket)
-        print("3: Receive data from remote_host")
+                # 2: Send received data in step 1 to remote_host
+                remote_socket.send(local_data)
+                print("2: Send received data in step 1 to remote_host")
 
-        if len(remote_data) > 0:
+            # 3: Receive data from remote_host
+            remote_data = receive_data(remote_socket)
+            print("3: Receive data from remote_host")
 
-            # 4: Send received data in step 3 to local_host
-            client_socket.send(remote_data)
-            print("4: Send received data in step 3 to local_host")
+            if len(remote_data) > 0:
 
-        if len(local_data) == 0 or len(remote_data) == 0:
-            print("No more data to exchange, closing connections.")
+                # 4: Send received data in step 3 to local_host
+                client_socket.send(remote_data)
+                print("4: Send received data in step 3 to local_host")
+
+            if len(local_data) == 0 or len(remote_data) == 0:
+                print("No more data to exchange, closing connections.")
+                client_socket.close()
+                remote_socket.close()
+                break
+
+        except Exception as e:
+            print("Exception %s" % e)
             client_socket.close()
             remote_socket.close()
-            break
 
 def server_loop(local_host, local_port, remote_host, remote_port, receive_first):
     """
@@ -105,14 +118,16 @@ def server_loop(local_host, local_port, remote_host, remote_port, receive_first)
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((local_host, local_port))
     print("Listening on %s:%i" % (local_host, local_port))
-    server_socket.listen(1)
+    server_socket.listen(5)
 
     while True:
         client_socket, client_address = server_socket.accept()
         print("Received incoming connection from: %s:%i" % (local_host, local_port))
 
-        # Start client
-        client_handler(client_socket, remote_host, remote_port, receive_first)
+        # Start client thread
+
+        client_thread = threading.Thread(target=client_handler, args=(client_socket, remote_host, remote_port, receive_first))
+        client_thread.start()
 
 def main():
     """
