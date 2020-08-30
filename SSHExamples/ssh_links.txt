@@ -1,0 +1,19 @@
+Links to websites about SSH
+
+SSH setup and explanation
+https://www.digitalocean.com/community/tutorials/ssh-essentials-working-with-ssh-servers-clients-and-keys
+https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server
+https://www.lmgsecurity.com/enable-start-ssh-kali-linux/
+https://miloserdov.org/?p=3462
+
+Key generation, connecting to SSH server with Putty keys
+https://www.digitalocean.com/community/tutorials/how-to-create-ssh-keys-with-putty-to-connect-to-a-vps
+https://stackoverflow.com/a/44203589
+
+RSA keys in Paramiko:
+https://gist.github.com/batok/2352501
+
+Paramiko in general:
+https://mrcissp.com/2019/12/17/python-package-paramiko/
+https://hackersandslackers.com/automate-ssh-scp-python-paramiko/
+https://www.devdungeon.com/content/python-ssh-tutorial
