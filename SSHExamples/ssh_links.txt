@@ -6,6 +6,9 @@ https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-
 https://www.lmgsecurity.com/enable-start-ssh-kali-linux/
 https://miloserdov.org/?p=3462
 
+User configuration
+https://www.digitalocean.com/community/tutorials/how-to-create-a-new-sudo-enabled-user-on-ubuntu-20-04-quickstart
+
 Key generation, connecting to SSH server with Putty keys
 https://www.digitalocean.com/community/tutorials/how-to-create-ssh-keys-with-putty-to-connect-to-a-vps
 https://stackoverflow.com/a/44203589
