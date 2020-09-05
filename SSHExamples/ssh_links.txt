@@ -5,6 +5,7 @@ https://www.digitalocean.com/community/tutorials/ssh-essentials-working-with-ssh
 https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server
 https://www.lmgsecurity.com/enable-start-ssh-kali-linux/
 https://miloserdov.org/?p=3462
+https://blog.runcloud.io/why-authentication-using-ssh-public-key-is-better-than-using-password-and-how-do-they-work/
 
 User configuration
 https://www.digitalocean.com/community/tutorials/how-to-create-a-new-sudo-enabled-user-on-ubuntu-20-04-quickstart
