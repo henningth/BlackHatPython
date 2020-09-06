@@ -21,3 +21,6 @@ Paramiko in general:
 https://mrcissp.com/2019/12/17/python-package-paramiko/
 https://hackersandslackers.com/automate-ssh-scp-python-paramiko/
 https://www.devdungeon.com/content/python-ssh-tutorial
+
+Virtual Machine Networking:
+https://www.nakivo.com/blog/virtualbox-network-setting-guide/
