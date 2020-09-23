@@ -44,3 +44,5 @@ stdin, stdout, stderr = ssh_client.exec_command("pwd")
 # Print command output
 print("stdout: %s" % stdout.read().decode())
 print("stderr: %s" % stderr.read().decode())
+
+ssh_client.close()
